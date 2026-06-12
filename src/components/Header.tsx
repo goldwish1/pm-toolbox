@@ -17,7 +17,7 @@ export default function Header() {
           <Link
             href="/knowledge"
             className={`text-sm transition-colors ${
-              pathname === "/knowledge"
+              pathname.startsWith("/knowledge")
                 ? "text-primary-500"
                 : "text-gray-400 hover:text-gray-600"
             }`}
