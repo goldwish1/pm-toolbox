@@ -25,7 +25,7 @@ export default function HomePage() {
               浏览知识库
             </Link>
             <Link
-              href="/ai-recommend"
+              href="/"
               className="inline-flex items-center justify-center px-8 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-400 transition-colors border border-primary-400"
             >
               AI 推荐工具
