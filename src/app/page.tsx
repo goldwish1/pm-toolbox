@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { getAllTools } from "@/lib/tools";
 
@@ -23,52 +23,43 @@ export default function HomePage() {
   const [result, setResult] = useState<SearchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const hotTools = useMemo(() => getAllTools().slice(0, 4), []);
 
+  const doSearch = useCallback(async (question: string) => {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setHasSearched(true);
+
+    try {
+      const res = await fetch("/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      if (!res.ok) {
+        setError("暂时无法获取推荐，请稍后重试");
+        return;
+      }
+      const data = await res.json();
+      setResult(data);
+    } catch {
+      setError("暂时无法获取推荐，请稍后重试");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const handleSearch = useCallback(
-    async (e: React.FormEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
       const trimmed = query.trim();
       if (!trimmed || loading) return;
-
-      setLoading(true);
-      setError(null);
-      setResult(null);
-      setHasSearched(true);
-
-      try {
-        const res = await fetch("/api/recommend", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: trimmed }),
-        });
-        const data = await res.json();
-        setResult(data);
-      } catch {
-        setError("暂时无法获取推荐，请稍后重试");
-      } finally {
-        setLoading(false);
-      }
+      doSearch(trimmed);
     },
-    [query, loading]
+    [query, loading, doSearch]
   );
-
-  const handleRetry = useCallback(() => {
-    setError(null);
-    setLoading(true);
-    const trimmed = query.trim();
-    fetch("/api/recommend", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: trimmed }),
-    })
-      .then((res) => res.json())
-      .then((data) => setResult(data))
-      .catch(() => setError("暂时无法获取推荐，请稍后重试"))
-      .finally(() => setLoading(false));
-  }, [query]);
 
   return (
     <div className="min-h-[calc(100vh-3rem)] flex flex-col">
@@ -88,7 +79,6 @@ export default function HomePage() {
         <form onSubmit={handleSearch} className="w-full max-w-xl px-4">
           <div className="relative">
             <input
-              ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -131,7 +121,7 @@ export default function HomePage() {
           <div className="text-center py-12">
             <p className="text-sm text-gray-400 mb-4">{error}</p>
             <button
-              onClick={handleRetry}
+              onClick={() => doSearch(query.trim())}
               className="text-sm text-primary-500 hover:text-primary-600 font-medium"
             >
               重试
