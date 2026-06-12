@@ -5,44 +5,58 @@ import {
   getToolsByProcessGroupAndArea,
 } from "@/lib/tools";
 
-export default function MatrixView() {
+interface MatrixViewProps {
+  selectedGroup?: string;
+  selectedArea?: string;
+}
+
+export default function MatrixView({ selectedGroup = "", selectedArea = "" }: MatrixViewProps) {
+  const groupsToShow = selectedGroup
+    ? processGroups.filter((g) => g === selectedGroup)
+    : processGroups;
+
+  const areasToShow = selectedArea
+    ? knowledgeAreas.filter((a) => a === selectedArea)
+    : knowledgeAreas;
+
   return (
-    <div className="space-y-10">
-      {processGroups.map((group) => (
-        <div key={group}>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 bg-primary-500 rounded-full"></span>
-            {group}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {knowledgeAreas.map((area) => {
-              const tools = getToolsByProcessGroupAndArea(group, area);
-              if (tools.length === 0) return null;
-              return (
-                <div
-                  key={`${group}-${area}`}
-                  className="bg-white rounded-lg border border-gray-200 p-3"
-                >
-                  <div className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">
-                    {area}
+    <div className="space-y-8">
+      {groupsToShow.map((group) => {
+        const groupTools = areasToShow.flatMap((area) =>
+          getToolsByProcessGroupAndArea(group, area)
+        );
+        if (groupTools.length === 0) return null;
+
+        return (
+          <div key={group}>
+            <h3 className="text-xs font-medium text-gray-400 mb-3 pb-2 border-b border-gray-100">
+              {group}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {areasToShow.map((area) => {
+                const tools = getToolsByProcessGroupAndArea(group, area);
+                if (tools.length === 0) return null;
+                return (
+                  <div key={`${group}-${area}`} className="py-1">
+                    <div className="text-xs text-gray-400 mb-1.5">{area}</div>
+                    <div className="space-y-0.5">
+                      {tools.map((tool) => (
+                        <Link
+                          key={tool.slug}
+                          href={`/knowledge/${tool.slug}`}
+                          className="block text-sm text-gray-600 hover:text-primary-500 hover:bg-gray-50 px-2 py-1 -mx-2 rounded-md transition-colors"
+                        >
+                          {tool.name}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    {tools.map((tool) => (
-                      <Link
-                        key={tool.slug}
-                        href={`/knowledge/${tool.slug}`}
-                        className="block text-sm text-gray-700 hover:text-primary-600 hover:bg-primary-50 px-2 py-1 rounded transition-colors"
-                      >
-                        {tool.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
