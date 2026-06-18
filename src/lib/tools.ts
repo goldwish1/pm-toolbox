@@ -1,5 +1,13 @@
 import toolsData from "../../data/tools.json";
 
+export interface TemplateField {
+  key: string;
+  label: string;
+  type: "text" | "textarea";
+  placeholder: string;
+  hint?: string;
+}
+
 export interface Tool {
   slug: string;
   name: string;
@@ -11,6 +19,7 @@ export interface Tool {
   steps: string[];
   scenarios: string[];
   template: string;
+  templateFields?: TemplateField[];
 }
 
 export const processGroups = ["启动", "规划", "执行", "监控", "收尾"];

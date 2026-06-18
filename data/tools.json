@@ -16,7 +16,18 @@
       "获得发起人签字批准"
     ],
     "scenarios": ["项目启动", "授权确认", "目标对齐"],
-    "template": "项目名称、发起人、项目经理、商业论证、高层级范围、里程碑、预算、风险、签字栏"
+    "template": "项目名称、发起人、项目经理、商业论证、高层级范围、里程碑、预算、风险、签字栏",
+    "templateFields": [
+      { "key": "projectName", "label": "项目名称", "type": "text", "placeholder": "输入项目名称", "hint": "建议使用简洁明确的项目名称，让所有干系人一眼理解项目内容" },
+      { "key": "sponsor", "label": "项目发起人", "type": "text", "placeholder": "输入发起人姓名", "hint": "发起人是为项目提供资金和资源的人，通常是高层管理者" },
+      { "key": "projectManager", "label": "项目经理", "type": "text", "placeholder": "输入项目经理姓名" },
+      { "key": "businessCase", "label": "商业论证", "type": "textarea", "placeholder": "描述项目的商业价值和必要性...", "hint": "回答一个问题：为什么要做这个项目？不做会怎样？" },
+      { "key": "highLevelScope", "label": "高层级范围", "type": "textarea", "placeholder": "描述项目的主要范围和边界...", "hint": "明确项目包含什么、不包含什么，避免范围蔓延" },
+      { "key": "milestones", "label": "关键里程碑", "type": "textarea", "placeholder": "列出主要里程碑和时间节点..." },
+      { "key": "budget", "label": "预算", "type": "text", "placeholder": "输入项目预算" },
+      { "key": "risks", "label": "主要风险", "type": "textarea", "placeholder": "列出已知的主要风险和假设条件..." },
+      { "key": "signature", "label": "签字栏", "type": "text", "placeholder": "发起人签字及日期" }
+    ]
   },
   {
     "slug": "stakeholder-register",
