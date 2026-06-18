@@ -100,7 +100,7 @@ export function generateMarkdown(
   return lines.join("\n");
 }
 
-// 生成富文本 HTML 表格，粘贴到飞书时直接渲染为带样式的表格
+// 生成富文本 HTML 模板卡片，粘贴到飞书时渲染为与网页端一致的卡片样式
 export function generateHTML(
   values: Record<string, string>,
   fields: TemplateField[],
@@ -108,14 +108,23 @@ export function generateHTML(
 ): string {
   const rows = fields
     .map((field) => {
-      const value = values[field.key] || "（待填写）";
+      const value = values[field.key] || '<span style="color:#d1d5db">（待填写）</span>';
       const cell = value.replace(/\n/g, "<br>");
-      return `<tr><td style="padding:8px 12px;border:1px solid #e5e5e5;font-weight:500;color:#666;white-space:nowrap;background:#fafafa">${field.label}</td><td style="padding:8px 12px;border:1px solid #e5e5e5;color:#333">${cell}</td></tr>`;
+      return `<tr>
+<td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;font-weight:500;color:#6b7280;font-size:13px;width:110px;vertical-align:top">${field.label}</td>
+<td style="padding:10px 14px;border-bottom:1px solid #f3f4f6;color:#1f2937;font-size:13px;line-height:1.6">${cell}</td>
+</tr>`;
     })
     .join("");
 
-  return `<h1 style="font-size:20px;font-weight:700;margin-bottom:16px">${toolName}</h1>
-<table style="border-collapse:collapse;width:100%;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;max-width:680px;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden">
+<div style="padding:12px 20px;border-bottom:1px solid #f3f4f6;background:#f9fafb">
+<h2 style="font-size:14px;font-weight:600;color:#111827;margin:0">${toolName} 模板</h2>
+</div>
+<div style="padding:20px">
+<table style="border-collapse:collapse;width:100%">
 <tbody>${rows}</tbody>
-</table>`;
+</table>
+</div>
+</div>`;
 }
