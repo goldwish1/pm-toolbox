@@ -101,42 +101,51 @@ export function generateMarkdown(
 }
 
 // 生成飞书文档专用的 Markdown（lark doc create --stdin 使用）
-// 排版更丰富：标题 + 分割线 + 表格 + 分区标题
+// 排版风格：简洁、留白、层次分明，像一份真正的文档
 export function generateFeishuContent(
   values: Record<string, string>,
   fields: TemplateField[],
   toolName: string
 ): string {
   const lines: string[] = [];
+
+  // 文档标题
   lines.push(`# ${toolName}`);
   lines.push("");
+
+  // 分隔线 + 空行，视觉上区分标题区和正文区
   lines.push("---");
   lines.push("");
 
-  // 表格：所有 text 类型的字段
+  // 基本信息：text 类型字段用加粗标签 + 内容并排，比表格更干净
   const textFields = fields.filter((f) => f.type === "text");
   if (textFields.length > 0) {
-    lines.push("## 基本信息");
-    lines.push("");
-    lines.push("| 字段 | 内容 |");
-    lines.push("|------|------|");
     for (const field of textFields) {
       const value = values[field.key] || "（待填写）";
-      lines.push(`| ${field.label} | ${value} |`);
+      lines.push(`**${field.label}**：${value}`);
+      lines.push("");
     }
-    lines.push("");
     lines.push("---");
     lines.push("");
   }
 
-  // 分区：每个 textarea 字段独立一个区块
+  // 正文区块：每个 textarea 字段独立一个 H2 区块
   const textareaFields = fields.filter((f) => f.type === "textarea");
   for (const field of textareaFields) {
     const value = values[field.key] || "（待填写）";
     lines.push(`## ${field.label}`);
     lines.push("");
-    lines.push(value);
-    lines.push("");
+    // 多行内容保留换行，飞书会渲染为独立段落
+    const paragraphs = value.split("\n").filter(Boolean);
+    if (paragraphs.length > 0) {
+      for (const p of paragraphs) {
+        lines.push(p);
+        lines.push("");
+      }
+    } else {
+      lines.push("（待填写）");
+      lines.push("");
+    }
     lines.push("---");
     lines.push("");
   }
