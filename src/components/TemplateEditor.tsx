@@ -100,6 +100,50 @@ export function generateMarkdown(
   return lines.join("\n");
 }
 
+// 生成飞书文档专用的 Markdown（lark doc create --stdin 使用）
+// 排版更丰富：标题 + 分割线 + 表格 + 分区标题
+export function generateFeishuContent(
+  values: Record<string, string>,
+  fields: TemplateField[],
+  toolName: string
+): string {
+  const lines: string[] = [];
+  lines.push(`# ${toolName}`);
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+
+  // 表格：所有 text 类型的字段
+  const textFields = fields.filter((f) => f.type === "text");
+  if (textFields.length > 0) {
+    lines.push("## 基本信息");
+    lines.push("");
+    lines.push("| 字段 | 内容 |");
+    lines.push("|------|------|");
+    for (const field of textFields) {
+      const value = values[field.key] || "（待填写）";
+      lines.push(`| ${field.label} | ${value} |`);
+    }
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+  }
+
+  // 分区：每个 textarea 字段独立一个区块
+  const textareaFields = fields.filter((f) => f.type === "textarea");
+  for (const field of textareaFields) {
+    const value = values[field.key] || "（待填写）";
+    lines.push(`## ${field.label}`);
+    lines.push("");
+    lines.push(value);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
 // 生成富文本 HTML 模板卡片，粘贴到飞书时渲染为与网页端一致的卡片样式
 export function generateHTML(
   values: Record<string, string>,

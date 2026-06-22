@@ -3,7 +3,7 @@
 import { useState } from "react";
 import html2canvas from "html2canvas";
 import type { TemplateField } from "@/lib/tools";
-import { generateMarkdown, generateHTML } from "./TemplateEditor";
+import { generateMarkdown, generateHTML, generateFeishuContent } from "./TemplateEditor";
 
 interface Props {
   values: Record<string, string>;
@@ -40,6 +40,26 @@ export default function ExportButton({ values, fields, toolName, templateRef }: 
   };
 
   const handleCopyToFeishu = async () => {
+    const content = generateFeishuContent(values, fields, toolName);
+
+    // 尝试调本地 lark-bridge 代理
+    try {
+      const res = await fetch("http://localhost:3456/create-doc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: toolName, content }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        window.open(data.url, "_blank");
+        showToast("飞书文档已创建");
+        return;
+      }
+    } catch {
+      // 本地代理未启动，降级到剪贴板
+    }
+
+    // 降级：复制富文本 HTML 到剪贴板
     const html = generateHTML(values, fields, toolName);
     const plain = generateMarkdown(values, fields, toolName);
     const blob = new Blob([html], { type: "text/html" });
@@ -48,7 +68,7 @@ export default function ExportButton({ values, fields, toolName, templateRef }: 
       "text/plain": new Blob([plain], { type: "text/plain" }),
     });
     await navigator.clipboard.write([item]);
-    showToast("已复制，在飞书中粘贴即可");
+    showToast("已复制，在飞书中粘贴即可（启动 lark-bridge 可自动创建文档）");
   };
 
   return (
