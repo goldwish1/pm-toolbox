@@ -101,7 +101,7 @@ export function generateMarkdown(
 }
 
 // 生成飞书文档专用的 Markdown（lark doc create --stdin 使用）
-// 排版风格：简洁、留白、层次分明，像一份真正的文档
+// 排版风格：标题 + 两栏表格 + 分区正文，简洁专业
 export function generateFeishuContent(
   values: Record<string, string>,
   fields: TemplateField[],
@@ -112,19 +112,19 @@ export function generateFeishuContent(
   // 文档标题
   lines.push(`# ${toolName}`);
   lines.push("");
-
-  // 分隔线 + 空行，视觉上区分标题区和正文区
   lines.push("---");
   lines.push("");
 
-  // 基本信息：text 类型字段用加粗标签 + 内容并排，比表格更干净
+  // 基本信息：text 类型字段用两栏表格展示，干净对齐
   const textFields = fields.filter((f) => f.type === "text");
   if (textFields.length > 0) {
+    lines.push("| 项目 | 内容 |");
+    lines.push("|------|------|");
     for (const field of textFields) {
       const value = values[field.key] || "（待填写）";
-      lines.push(`**${field.label}**：${value}`);
-      lines.push("");
+      lines.push(`| ${field.label} | ${value} |`);
     }
+    lines.push("");
     lines.push("---");
     lines.push("");
   }
@@ -135,7 +135,6 @@ export function generateFeishuContent(
     const value = values[field.key] || "（待填写）";
     lines.push(`## ${field.label}`);
     lines.push("");
-    // 多行内容保留换行，飞书会渲染为独立段落
     const paragraphs = value.split("\n").filter(Boolean);
     if (paragraphs.length > 0) {
       for (const p of paragraphs) {
