@@ -2,17 +2,21 @@
 
 import { useState } from "react";
 import html2canvas from "html2canvas";
-import type { TemplateField } from "@/lib/tools";
-import { generateMarkdown, generateHTML, generateFeishuContent } from "./TemplateEditor";
+import {
+  generateMarkdown,
+  generateHTML,
+  generateFeishuContent,
+  type ExportContext,
+} from "@/lib/export";
 
 interface Props {
   values: Record<string, string>;
-  fields: TemplateField[];
+  exportCtx: ExportContext;
   toolName: string;
   templateRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export default function ExportButton({ values, fields, toolName, templateRef }: Props) {
+export default function ExportButton({ values, exportCtx, toolName, templateRef }: Props) {
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -21,7 +25,7 @@ export default function ExportButton({ values, fields, toolName, templateRef }: 
   };
 
   const handleCopyMD = async () => {
-    const md = generateMarkdown(values, fields, toolName);
+    const md = generateMarkdown(values, exportCtx, toolName);
     await navigator.clipboard.writeText(md);
     showToast("Markdown 已复制到剪贴板");
   };
@@ -40,11 +44,11 @@ export default function ExportButton({ values, fields, toolName, templateRef }: 
   };
 
   const handleCopyToFeishu = async () => {
-    const content = generateFeishuContent(values, fields, toolName);
+    const content = generateFeishuContent(values, exportCtx, toolName);
 
     // 尝试调本地 lark-bridge 代理
     try {
-      const res = await fetch("http://localhost:3456/create-doc", {
+      const res = await fetch("/api/lark/create-doc", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: toolName, content }),
@@ -60,8 +64,8 @@ export default function ExportButton({ values, fields, toolName, templateRef }: 
     }
 
     // 降级：复制富文本 HTML 到剪贴板
-    const html = generateHTML(values, fields, toolName);
-    const plain = generateMarkdown(values, fields, toolName);
+    const html = generateHTML(values, exportCtx, toolName);
+    const plain = generateMarkdown(values, exportCtx, toolName);
     const blob = new Blob([html], { type: "text/html" });
     const item = new ClipboardItem({
       "text/html": blob,

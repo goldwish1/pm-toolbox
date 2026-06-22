@@ -5,7 +5,12 @@ import Link from "next/link";
 import type { Tool } from "@/lib/tools";
 import ToolCard from "@/components/ToolCard";
 import TemplateEditor from "@/components/TemplateEditor";
+import MatrixEditor from "@/components/MatrixEditor";
+import TableEditor from "@/components/TableEditor";
+import TreeEditor from "@/components/TreeEditor";
+import TimelineEditor from "@/components/TimelineEditor";
 import ExportButton from "@/components/ExportButton";
+import type { ExportContext } from "@/lib/export";
 
 export default function ToolDetailClient({
   tool,
@@ -19,7 +24,42 @@ export default function ToolDetailClient({
   const [stepsOpen, setStepsOpen] = useState(false);
   const [scenariosOpen, setScenariosOpen] = useState(false);
 
-  const hasTemplateFields = tool.templateFields && tool.templateFields.length > 0;
+  const templateType = tool.templateType || "form";
+  const hasTemplate = tool.templateFields || tool.matrixConfig || tool.tableConfig || tool.treeConfig || tool.timelineConfig;
+
+  const exportCtx: ExportContext = {
+    templateType,
+    fields: tool.templateFields,
+    matrixConfig: tool.matrixConfig,
+    tableConfig: tool.tableConfig,
+    treeConfig: tool.treeConfig,
+    timelineConfig: tool.timelineConfig,
+  };
+
+  function renderTemplateEditor() {
+    switch (templateType) {
+      case "matrix":
+        return tool.matrixConfig ? (
+          <MatrixEditor config={tool.matrixConfig} onValuesChange={setTemplateValues} />
+        ) : null;
+      case "table":
+        return tool.tableConfig ? (
+          <TableEditor config={tool.tableConfig} onValuesChange={setTemplateValues} />
+        ) : null;
+      case "tree":
+        return tool.treeConfig ? (
+          <TreeEditor config={tool.treeConfig} onValuesChange={setTemplateValues} />
+        ) : null;
+      case "timeline":
+        return tool.timelineConfig ? (
+          <TimelineEditor config={tool.timelineConfig} onValuesChange={setTemplateValues} />
+        ) : null;
+      default:
+        return tool.templateFields ? (
+          <TemplateEditor fields={tool.templateFields} onValuesChange={setTemplateValues} />
+        ) : null;
+    }
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
@@ -56,26 +96,22 @@ export default function ToolDetailClient({
       </div>
 
       {/* 模板工作区（核心区域） */}
-      {hasTemplateFields ? (
+      {hasTemplate ? (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-semibold text-gray-900">模板</h2>
             <ExportButton
               values={templateValues}
-              fields={tool.templateFields!}
+              exportCtx={exportCtx}
               toolName={tool.name}
               templateRef={templateRef}
             />
           </div>
           <div ref={templateRef}>
-            <TemplateEditor
-              fields={tool.templateFields!}
-              onValuesChange={setTemplateValues}
-            />
+            {renderTemplateEditor()}
           </div>
         </div>
       ) : (
-        /* 降级：无 templateFields 的工具显示旧版模板 */
         tool.template && (
           <section className="mb-6">
             <h2 className="text-base font-semibold text-gray-900 mb-3">模板参考</h2>

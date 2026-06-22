@@ -1,5 +1,10 @@
 import toolsData from "../../data/tools.json";
 
+// ── Template Types ──────────────────────────────────────────
+
+export type TemplateType = "form" | "matrix" | "table" | "tree" | "timeline";
+
+/** Form: key-value field list */
 export interface TemplateField {
   key: string;
   label: string;
@@ -7,6 +12,58 @@ export interface TemplateField {
   placeholder: string;
   hint?: string;
 }
+
+/** Matrix: visual grid (e.g. SWOT, Power/Interest Grid) */
+export interface MatrixCell {
+  row: number;
+  col: number;
+  key: string;
+  label: string;
+  hint?: string;
+}
+
+export interface MatrixConfig {
+  rowLabels: string[];
+  colLabels: string[];
+  cells: MatrixCell[];
+}
+
+/** Table: dynamic-row table (e.g. RACI, Risk Register) */
+export interface TableColumn {
+  key: string;
+  label: string;
+  type: "text" | "textarea";
+  placeholder: string;
+}
+
+export interface TableConfig {
+  columns: TableColumn[];
+}
+
+/** Tree: hierarchical decomposition (e.g. WBS) */
+export interface TreeLevel {
+  key: string;
+  label: string;
+  placeholder: string;
+}
+
+export interface TreeConfig {
+  rootLabel: string;
+  levels: TreeLevel[];
+}
+
+/** Timeline: visual timeline (e.g. Gantt, Milestone Chart) */
+export interface TimelineMilestone {
+  key: string;
+  label: string;
+  placeholder: string;
+}
+
+export interface TimelineConfig {
+  milestones: TimelineMilestone[];
+}
+
+// ── Tool ────────────────────────────────────────────────────
 
 export interface Tool {
   slug: string;
@@ -19,7 +76,12 @@ export interface Tool {
   steps: string[];
   scenarios: string[];
   template: string;
+  templateType?: TemplateType;
   templateFields?: TemplateField[];
+  matrixConfig?: MatrixConfig;
+  tableConfig?: TableConfig;
+  treeConfig?: TreeConfig;
+  timelineConfig?: TimelineConfig;
 }
 
 export const processGroups = ["启动", "规划", "执行", "监控", "收尾"];

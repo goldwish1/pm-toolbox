@@ -53,10 +53,27 @@ Tailwind CSS with a custom `primary` color palette (blue: 50–900). The theme i
 
 ## Deployment
 
-Deployed on Vercel (account: goldwish1), connected to GitHub repo `goldwish1/pm-toolbox`. Every push to `main` triggers automatic deployment.
+内网部署，一个命令启动所有服务。
 
-Environment variable required for AI recommendations:
-- `DEEPSEEK_API_KEY` — DeepSeek API key (model: `deepseek-chat`)
+### 部署
+
+```bash
+npm run build     # 构建
+npm start         # 启动（端口 3000），飞书导出 API 已内置
+```
+
+### 更新代码后
+
+```bash
+git pull
+npm run build
+npm start
+```
+
+### 环境变量
+
+AI 推荐需要以下环境变量（export 后再启动）：
+- `DEEPSEEK_API_KEY` — DeepSeek API key（model: `deepseek-chat`）
 
 ## Design Docs
 
